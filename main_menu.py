@@ -145,7 +145,7 @@ while run_game:
         click = pygame.mouse.get_pressed()
         if click == (1, 0, 0):
 
-            quit_game()
+            run_game = game.quit_game()
 
     screen.blit(header, (WIDTH // 2 - HEIGHT // 2, WIDTH // 10))
     screen.blit(start_game, (WIDTH // 2 - WIDTH // 10, HEIGHT // 3.15))
