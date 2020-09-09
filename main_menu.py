@@ -3,6 +3,7 @@ from TheGame import TheGame
 from random import randint
 from time import time
 from fonts import Fonts
+from pygame import mixer
 
 pygame.init()
 WIDTH = 800
@@ -14,6 +15,8 @@ pygame.display.set_caption("War In Space 2D")
 icon = pygame.image.load("data\\warinspaceicon.png")
 pygame.display.set_icon(icon)
 
+mixer.music.load("data\\warinspaceriff.ogg")
+mixer.music.play(-1)
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 run_game = True
