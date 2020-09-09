@@ -7,82 +7,84 @@
  
  ![wis1](https://user-images.githubusercontent.com/67822910/91369924-aba69600-e815-11ea-9bf6-426c95405b50.PNG)
  
- This is main menu code:
+ The game starts first from the main menu. In this code, other written modules are imported.
+ ```
+ import pygame
+ from TheGame import TheGame
+ from random import randint
+ from time import time
+ from fonts import Fonts
+ ```
  
- running = True
-while running:
-    screen.fill((3, 3, 15))
+ The module in which the fonts are loaded is as follows.
+ ```
+ import pygame
 
-    #screen.blit(background, (0, 0))
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
 
-    stars.append([random.randint(0, WIDTH), random.randint(0, HEIGHT)])
+class Fonts:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
 
-    background_stars(stars)
-    if len(stars) > 100:
-        stars.pop(len(stars) - 1)
+    def fight_panel_font(self):
+        font_fight_panel = pygame.font.Font("data\\skyridgesuperital.ttf", self.height // 25)
+        return font_fight_panel
 
-    if time.time() >= falling_star_loop_time + 2:
-        starrx, star_y_temp, x_dif, y_dif_temp = falling_star(starrx, star_y_temp, x_dif, y_dif_temp)
-        if starrx == WIDTH + 50:
-            falling_star_loop_time = time.time()
-            x_dif = 1
-            star_y_index += 1
-            if star_y_index == 4:
-                star_y_index = 0
-            star_y_temp = starry[star_y_index]
-            y_dif_temp = y_dif[star_y_index]
+    def score_panel_font(self):
+        font_score_panel = pygame.font.Font("data\\skyridgesuperital.ttf", self.height // 35)
+        return font_score_panel
 
-    font_start_header = pygame.font.Font("data\skyridgegradital.ttf", (WIDTH // 15))
-    font_start_menu = pygame.font.Font("data\skyridgesuperital.ttf", WIDTH // 46)
-    font_fight_panel = pygame.font.Font("data\skyridgesuperital.ttf", HEIGHT // 25)
-    font_score_panel = pygame.font.Font("data\skyridgesuperital.ttf", HEIGHT // 35)
+    def start_header_font(self):
+        font_start_header = pygame.font.Font("data\\skyridgegradital.ttf", (self.width // 15))
+        return font_start_header
 
-    start_game_button = pygame.draw.rect(screen, (255, 0, 0), (WIDTH//2 - WIDTH//8, HEIGHT//3.5,
-                                                               WIDTH//4, HEIGHT//10))
-    settings_button = pygame.draw.rect(screen, (255, 0, 0), (WIDTH//2 - WIDTH//8, HEIGHT//3.5 + (11 * HEIGHT)//60,
-                                                             WIDTH//4, HEIGHT//10))
-    credits_button = pygame.draw.rect(screen, (255, 0, 0), (WIDTH//2 - WIDTH//8, HEIGHT//3.5 + (22 * HEIGHT)//60,
-                                                               WIDTH//4, HEIGHT//10))
-    quit_game_button = pygame.draw.rect(screen, (255, 0, 0),(WIDTH // 2 - WIDTH // 8, HEIGHT // 3.5 + (33 * HEIGHT) // 60,
-                                                             WIDTH // 4, HEIGHT // 10))
-    header = font_start_header.render("WAR IN SPACE", True, (255, 0, 0))
-    start_game = font_start_menu.render("START GAME", True, (25, 25, 25))
-    settings = font_start_menu.render("SETTINGS", True, (25, 25, 25))
-    credit = font_start_menu.render("CREDITS", True, (25, 25, 25))
-    quit_game = font_start_menu.render("QUIT GAME", True, (25, 25, 25))
+    def start_menu_font(self):
+        font_start_menu = pygame.font.Font("data\\skyridgesuperital.ttf", self.width // 46)
+        return font_start_menu
+ ```
+ 
+ In the background of the game, there are stars with a flashing effect that I created by forming particles. In addition to this, there are shooting stars that appear on the  screen every half second and have 4 different starting points. I created shooting stars with my particle array. Flashing star particles and shooting star particles in the background are defined by the following functions.
+ 
+ ```
+ ...
+ def background_stars(stars_list):
+    for star in stars_list:
+        background_stars_list.append([[star[0], star[1]], [randint(0, 10) - 5, randint(0, 10) - 5],
+                                     randint(1, 2)])
+        for particle in background_stars_list:
+            a = particle[0][0]
+            b = particle[0][1]
+            particle[0][0] += particle[1][0]
+            particle[0][1] += particle[1][1]
+            particle[2] -= 1
+            pygame.draw.circle(screen, (255, 255, 255), [int(particle[0][0]), int(particle[0][1])],
+                               int(particle[2]))
+            pygame.draw.line(screen, (255, 255, 255), [int(a), int(b)], [int(particle[0][0]), int(particle[0][1])], 1)
+            if particle[2] <= 0:
+                background_stars_list.remove(particle)
 
-    x, y = pygame.mouse.get_pos()
-    #print("[{},{}]".format(x, y))
-    if WIDTH//2 - WIDTH//8 < x < WIDTH//2 + WIDTH//8 and HEIGHT//3.5 < y < HEIGHT//3.5 + HEIGHT//10:
-        pygame.draw.rect(screen, (0, 255, 0), (WIDTH//2 - WIDTH//8, HEIGHT//3.5, WIDTH//4, HEIGHT//10))
-        click = pygame.mouse.get_pressed()
-        if click == (1, 0, 0):
-            the_game(event)
-    if WIDTH//2 - WIDTH//8 < x < WIDTH//2 + WIDTH//8 and HEIGHT//3.5 + (11 * HEIGHT)//60 < y < HEIGHT//3.5 + (11 * HEIGHT)//60 + HEIGHT//10:
-        pygame.draw.rect(screen, (0, 255, 0), (WIDTH//2 - WIDTH//8, HEIGHT//3.5 + (11 * HEIGHT)//60, WIDTH//4, HEIGHT//10))
-        click = pygame.mouse.get_pressed()
-        if click == (1, 0, 0):
-            WIDTH, HEIGHT, screen, starrx, starry, stars = settings_menu(screen)
-    if WIDTH//2 - WIDTH//8 < x < WIDTH//2 + WIDTH//8 and HEIGHT//3.5 + (22 * HEIGHT)//60 < y < HEIGHT//3.5 + (22 * HEIGHT)//60 + HEIGHT//10:
-        pygame.draw.rect(screen, (0, 255, 0), (WIDTH//2 - WIDTH//8, HEIGHT//3.5 + (22 * HEIGHT)//60, WIDTH//4, HEIGHT//10))
-        click = pygame.mouse.get_pressed()
-        if click == (1, 0, 0):
-            credits(screen)
-    if WIDTH//2 - WIDTH//8 < x < WIDTH//2 + WIDTH//8 and HEIGHT // 3.5 + (33 * HEIGHT) // 60 < y < HEIGHT // 3.5 + (33 * HEIGHT) // 60 + HEIGHT // 10:
-        pygame.draw.rect(screen, (0, 255, 0), (WIDTH // 2 - WIDTH // 8, HEIGHT // 3.5 + (33 * HEIGHT) // 60, WIDTH // 4, HEIGHT // 10))
-        click = pygame.mouse.get_pressed()
-        if click == (1, 0, 0):
-            quit_game()
-    screen.blit(header, (WIDTH // 2 - HEIGHT // 2, WIDTH // 10))
-    screen.blit(start_game, (WIDTH // 2 - WIDTH // 10, HEIGHT // 3.15))
-    screen.blit(settings, (WIDTH // 2 - WIDTH // 12.5, HEIGHT // 2))
-    screen.blit(credit, (WIDTH // 2 - WIDTH // 14, HEIGHT // 1.46))
-    screen.blit(quit_game, (WIDTH // 2 - WIDTH // 11.5, HEIGHT // 1.15))
-    pygame.display.update()
 
+def falling_star(star_x, star_y, x_difference, y_difference):
+    falling_star_list.append([[star_x, star_y], [randint(0, 10), randint(0, 2) - 1],
+                             randint(4, 6)])
+    for particle in falling_star_list:
+        particle[0][0] += particle[1][0]
+        particle[0][1] += particle[1][1]
+        particle[2] -= 0.2
+        pygame.draw.circle(screen, (220, 220, 255), [int(particle[0][0]), int(particle[0][1])],
+                           int(particle[2]))
+        if particle[2] <= 0:
+            falling_star_list.remove(particle)
+    star_x -= x_difference
+    star_y += y_difference
+    if star_x < -125:
+        star_x = WIDTH + 50
+        star_y = 400
+        x_difference = 0
+        y_difference = 0
+    return star_x, star_y, x_difference, y_difference
+ ...
+ ```
  
  Screen size can be changed by entering the settings menu.
  
@@ -91,96 +93,69 @@ while running:
  Options include 640x480, 800x600, 1024x768 and 1280x960.
  All game content is updated according to the screen setting.
  
-def settings_menu(screen):
-    running = True
-    while running:
-        global WIDTH, HEIGHT
-        screen.fill((3, 3, 15))
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        stars.append([random.randint(0, WIDTH), random.randint(0, HEIGHT)])
-
-        background_stars(stars)
-        if len(stars) > 100:
-            stars.pop(len(stars) - 1)
-        global falling_star_loop_time
-        if time.time() >= falling_star_loop_time + 2:
-            global starrx, star_y_temp, x_dif, y_dif_temp, star_y_index
-            starrx, star_y_temp, x_dif, y_dif_temp = falling_star(starrx, star_y_temp, x_dif, y_dif_temp)
-            if starrx == WIDTH + 50:
-                falling_star_loop_time = time.time()
-                x_dif = 1
-                star_y_index += 1
-                if star_y_index == 4:
-                    star_y_index = 0
-                global starry, y_dif
-                star_y_temp = starry[star_y_index]
-                y_dif_temp = y_dif[star_y_index]
-
-        setting1 = pygame.draw.rect(screen, (255, 0, 0), (WIDTH // 8, HEIGHT // 3, WIDTH//4, HEIGHT//8))
-        setting2 = pygame.draw.rect(screen, (255, 0, 0), (WIDTH // 8, (2 * HEIGHT) // 3, WIDTH//4, HEIGHT//8))
-        setting3 = pygame.draw.rect(screen, (255, 0, 0), (WIDTH // 2 + WIDTH // 8, HEIGHT // 3, WIDTH//4, HEIGHT//8))
-        setting4 = pygame.draw.rect(screen, (255, 0, 0), (WIDTH // 2 + WIDTH // 8, (2 * HEIGHT) // 3, WIDTH // 4, HEIGHT // 8))
-        header = font_start_header.render("WAR IN SPACE", True, (255, 0, 0))
-        setting1_text = font_start_menu.render("640x480", True, (25, 25, 25))
-        setting2_text = font_start_menu.render("800x600", True, (25, 25, 25))
-        setting3_text = font_start_menu.render("1024x768", True, (25, 25, 25))
-        setting4_text = font_start_menu.render("1280x960", True, (25, 25, 25))
-        x1, y1 = pygame.mouse.get_pos()
-        if WIDTH // 8 < x1 < WIDTH // 8 + WIDTH//4 and HEIGHT // 3 < y1 < HEIGHT // 3 + HEIGHT//8:
-            pygame.draw.rect(screen, (0, 255, 0), (WIDTH // 8, HEIGHT // 3, WIDTH//4, HEIGHT//8))
-            click = pygame.mouse.get_pressed()
-            if click == (1, 0, 0):
-                WIDTH, HEIGHT = 640, 480
-                screen = pygame.display.set_mode((WIDTH, HEIGHT))
-                starrx, starry = WIDTH + 50, [HEIGHT // 4, HEIGHT - HEIGHT // 24, HEIGHT // 2, HEIGHT - HEIGHT // 3]
-                bgr_list = []
-                break
-        if WIDTH // 8 < x1 < WIDTH // 8 + WIDTH//4 and (2 * HEIGHT) // 3 < y1 < (2 * HEIGHT) // 3 + HEIGHT//8:
-            pygame.draw.rect(screen, (0, 255, 0), (WIDTH // 8, (2 * HEIGHT) // 3, WIDTH//4, HEIGHT//8))
-            click = pygame.mouse.get_pressed()
-            if click == (1, 0, 0):
-                WIDTH, HEIGHT = 1024, 768
-                screen = pygame.display.set_mode((WIDTH, HEIGHT))
-                starrx, starry = WIDTH + 50, [HEIGHT // 4, HEIGHT - HEIGHT // 24, HEIGHT // 2, HEIGHT - HEIGHT // 3]
-                bgr_list = []
-                break
-        if WIDTH // 2 + WIDTH // 8 < x1 < WIDTH // 2 + WIDTH // 8 + WIDTH//4 and HEIGHT // 3 < y1 < HEIGHT // 3 + HEIGHT // 8:
-            pygame.draw.rect(screen, (0, 255, 0), (WIDTH // 2 + WIDTH // 8, HEIGHT // 3, WIDTH//4, HEIGHT//8))
-            click = pygame.mouse.get_pressed()
-            if click == (1, 0, 0):
-                WIDTH, HEIGHT = 800, 600
-                screen = pygame.display.set_mode((WIDTH, HEIGHT))
-                starrx, starry = WIDTH + 50, [HEIGHT // 4, HEIGHT - HEIGHT // 24, HEIGHT // 2, HEIGHT - HEIGHT // 3]
-                bgr_list = []
-                break
-        if WIDTH // 2 + WIDTH // 8 < x1 < WIDTH // 2 + WIDTH // 8 + WIDTH//4 and (2 * HEIGHT) // 3 < y1 < (2 * HEIGHT) // 3 + HEIGHT // 8:
-            pygame.draw.rect(screen, (0, 255, 0), (WIDTH // 2 + WIDTH // 8, (2 * HEIGHT) // 3, WIDTH // 4, HEIGHT // 8))
-            click = pygame.mouse.get_pressed()
-            if click == (1, 0, 0):
-                WIDTH, HEIGHT = 1280, 960
-                screen = pygame.display.set_mode((WIDTH, HEIGHT))
-                starrx, starry = WIDTH + 50, [HEIGHT // 4, HEIGHT - HEIGHT // 24, HEIGHT // 2, HEIGHT - HEIGHT // 3]
-                bgr_list = []
-                break
-        screen.blit(header, (WIDTH // 2 - HEIGHT // 2, WIDTH // 10))
-        screen.blit(setting1_text, (WIDTH // 4 - WIDTH // 15, HEIGHT // 2.70))
-        screen.blit(setting2_text, (WIDTH // 1.45, HEIGHT // 2.70))
-        screen.blit(setting3_text, (WIDTH // 4 - WIDTH // 14.5, HEIGHT // 1.41))
-        screen.blit(setting4_text, (WIDTH // 1.48, HEIGHT // 1.41))
-        pygame.display.update()
-    return WIDTH, HEIGHT, screen, starrx, starry, bgr_list
+ In the code below, you can find how the selection process is done in the settings menu. The size of the rectangle the mouse is clicked on is adjusted. All the codes of the settings section are available in the files
+ 
+ ```
+ ...
+ x1, y1 = pygame.mouse.get_pos()
+            if self.width // 8 < x1 < self.width // 8 + self.width // 4 and \
+                    self.height // 3 < y1 < self.height // 3 + self.height // 8:
+                pygame.draw.rect(screen, (0, 255, 0), (self.width // 8, self.height // 3,
+                                                       self.width // 4, self.height // 8))
+                click = pygame.mouse.get_pressed()
+                if click == (1, 0, 0):
+                    self.width, self.height = 640, 480
+                    pygame.display.set_mode((self.width, self.height))
+                    star_x_axis, star_y_axis = self.width + 50, [self.height // 4, self.height - self.height // 24,
+                                                                 self.height // 2, self.height - self.height // 3]
+                    background_list = []
+                    return self.width, self.height, background_list, star_x_axis, star_y_axis
+            if self.width // 8 < x1 < self.width // 8 + self.width // 4 and \
+                    (2 * self.height) // 3 < y1 < (2 * self.height) // 3 + self.height // 8:
+                pygame.draw.rect(screen, (0, 255, 0), (self.width // 8, (2 * self.height) // 3,
+                                                       self.width // 4, self.height // 8))
+                click = pygame.mouse.get_pressed()
+                if click == (1, 0, 0):
+                    self.width, self.height = 1024, 768
+                    pygame.display.set_mode((self.width, self.height))
+                    star_x_axis, star_y_axis = self.width + 50, [self.height // 4, self.height - self.height // 24,
+                                                                 self.height // 2, self.height - self.height // 3]
+                    background_list = []
+                    return self.width, self.height, background_list, star_x_axis, star_y_axis
+            if self.width // 2 + self.width // 8 < x1 < self.width // 2 + self.width // 8 + self.width // 4 and \
+                    self.height // 3 < y1 < self.height // 3 + self.height // 8:
+                pygame.draw.rect(screen, (0, 255, 0), (self.width // 2 + self.width // 8, self.height // 3,
+                                                       self.width // 4, self.height // 8))
+                click = pygame.mouse.get_pressed()
+                if click == (1, 0, 0):
+                    self.width, self.height = 800, 600
+                    pygame.display.set_mode((self.width, self.height))
+                    star_x_axis, star_y_axis = self.width + 50, [self.height // 4, self.height - self.height // 24,
+                                                                 self.height // 2, self.height - self.height // 3]
+                    background_list = []
+                    return self.width, self.height, background_list, star_x_axis, star_y_axis
+            if self.width // 2 + self.width // 8 < x1 < self.width // 2 + self.width // 8 + self.width // 4 and \
+                    (2 * self.height) // 3 < y1 < (2 * self.height) // 3 + self.height // 8:
+                pygame.draw.rect(screen, (0, 255, 0), (self.width // 2 + self.width // 8, (2 * self.height) // 3,
+                                                       self.width // 4, self.height // 8))
+                click = pygame.mouse.get_pressed()
+                if click == (1, 0, 0):
+                    self.width, self.height = 1280, 960
+                    pygame.display.set_mode((self.width, self.height))
+                    star_x_axis, star_y_axis = self.width + 50, [self.height // 4, self.height - self.height // 24,
+                                                                 self.height // 2, self.height - self.height // 3]
+                    background_list = []
+                    return self.width, self.height, background_list, star_x_axis, star_y_axis
+ ...
+ ```
  
  
- This is the first in-game view. The game has no consequences. You just shoot the enemy and the enemy shoots you. Of course you can dodge  enemy's laser beam  :)
- 
- In the background of the game, there are stars with a flashing effect that I created by forming particles. In addition to this, there are shooting stars that appear on the screen every half second and have 4 different starting points. I created shooting stars with my particle array. 
+ This is the first in-game view. The game has no consequences (:D). You just shoot the enemy and the enemy shoots you. Of course you can dodge  enemy's laser beam  :)
  
  ![wis3](https://user-images.githubusercontent.com/67822910/91370316-af86e800-e816-11ea-9214-dd0ef024531a.PNG)
  
  A plasma beam's charging bar is located in the bottom left of the game.
+ 
  
  ![wis4](https://user-images.githubusercontent.com/67822910/91370497-2f14b700-e817-11ea-86cb-2b1894c2c055.PNG)
  
@@ -196,41 +171,237 @@ def settings_menu(screen):
  
  ![wis7](https://user-images.githubusercontent.com/67822910/91371541-f0ccc700-e819-11ea-905d-d8b59a971ca2.PNG)
 
- def credits(screen):
-    global WIDTH, HEIGHT
-    credits_list_up = HEIGHT
-    running = True
-    while running:
-        screen.fill((3, 3, 15))
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-        back_main_menu = pygame.draw.rect(screen, (255, 0, 0), (WIDTH // 1.17, HEIGHT // 1.1, WIDTH // 8, HEIGHT // 15))
-        back_text = font_start_menu.render("BACK", True, (25, 25, 25))
+ # Okay, now let's talk a little bit about how it works.
+ # Classes and Game Structure
+ 
+ We have 5 different classes. These are "Player", "Enemy", "Bullet", "EnemyBullet", "Particles". The "Player" class contains the visual, location, and health of the player. The enemy class contains the visual, location, and health of the enemy. It includes a movement function that puts random limits on the enemy.
+ 
+```
+...
+        class Enemy(Player):
+            def __init__(self, vehicle_img, x_axis, y_axis, hit, health_pos_y, x_y_changer):
+                super().__init__(vehicle_img, x_axis, y_axis, hit, health_pos_y, x_y_changer)
 
-        designer = font_start_menu.render(" GAME DESIGNER", True, (255, 255, 255))
-        mert_ulas = font_start_menu.render("MERT ULAS", True, (255, 255, 255))
-        musics = font_start_menu.render("SOUND EFFECTS & MUSIC", True, (255, 255, 255))
-        contacts = font_start_menu.render("CONTACT", True, (255, 255, 255))
-        e_mail = font_start_menu.render("h.mert.ulas@gmail.com", True, (255, 255, 255))
+            def boundaries(self, right_boundary, left_boundary, x_changer, width):
+                self.x_axis += x_changer
+                if self.x_axis > right_boundary:
+                    x_changer *= -1
+                    left_boundary = randint(0, 350)
+                if self.x_axis < left_boundary:
+                    x_changer *= -1
+                    right_boundary = randint(450, width - 64)
+                return right_boundary, left_boundary, x_changer, self.x_axis
+...
+```
+There is a limitation on bullet movement. A new bullet cannot be fired before the bullet reaches the limits of the screen or hits the enemy! The same is true for the enemy's bullet. Before explaining this situation, let's take a look at the "Bullet" class.
+```
+...
+        class PlayerBullet:
+            def __init__(self, bullet_img, x_axis, y_axis, bullet_speed):
+                self.bullet_img = bullet_img
+                self.x_axis = x_axis
+                self.y_axis = y_axis
+                self.bullet_speed = bullet_speed
 
-        screen.blit(designer, (WIDTH // 2 - WIDTH // 7.25, credits_list_up))
-        screen.blit(mert_ulas, (WIDTH // 2 - WIDTH // 11.5, credits_list_up + HEIGHT // 12))
-        screen.blit(musics, (WIDTH // 2 - WIDTH // 5, credits_list_up + HEIGHT // 4))
-        screen.blit(mert_ulas, (WIDTH // 2 - WIDTH // 11.5, credits_list_up + HEIGHT // 3))
-        screen.blit(contacts, (WIDTH // 2 - WIDTH // 13, credits_list_up + HEIGHT // 2))
-        screen.blit(e_mail, (WIDTH // 2 - WIDTH // 6, credits_list_up + (7 * HEIGHT) // 12))
+            def is_fire_ready(self):
+                x_list = []
+                y_list = []
+                x_list.append(self.x_axis)
+                if len(x_list) > 2:
+                    x_list.pop(1)
+                y_list.append(self.y_axis)
+                if len(y_list) > 2:
+                    y_list.pop(1)
+                global fire_status_player
+                fire_status_player = "wait"
+                return x_list[0], y_list[0]
 
-        credits_list_up -= HEIGHT / 2000
+            def fire(self, bulletX, bulletY):
+                self.x_axis, self.y_axis = bulletX, bulletY
+                global fire_status_player
+                if fire_status_player is "wait":
+                    self.y_axis -= self.bullet_speed
+                    screen.blit(self.bullet_img, (self.x_axis - 2, self.y_axis))
+                    screen.blit(self.bullet_img, (self.x_axis + 36, self.y_axis))
+                return self.y_axis
+...
+```
+You remember that the "fire_status" variable defined at the beginning is "ready". When the space key is pressed, it is checked whether the "fire_status" variable is "ready". İf  the "fire_status" is "ready", The position of the shooting vehicle is thrown into an array. The first element of this sequence is preserved because the first element is the bullet position at the time of fire. If this was not done, the bullet would advance when it was fired, but it would move to the right and left at the same time as the vehicle. We don't want this. Until the bullet reaches the limits, this sequence is preserved and the "fire_status" variable takes the value "wait". When this happens, we cannot fire.
 
-        stars.append([random.randint(0, WIDTH), random.randint(0, HEIGHT)])
-        x, y = pygame.mouse.get_pos()
-        if WIDTH // 1.17 < x < WIDTH // 1.17 + WIDTH // 8 and HEIGHT // 1.1 < y < HEIGHT // 1.1 + HEIGHT // 15:
-            pygame.draw.rect(screen, (0, 255, 0), (WIDTH // 1.17, HEIGHT // 1.1, WIDTH // 8, HEIGHT // 15))
-            click = pygame.mouse.get_pressed()
-            if click == (1, 0, 0):
-                break
+# Collision Situation
+
+The distance is calculated based on the positions of the bullet and the target vehicle. If the value found by this calculation is less than a certain distance, it is accepted that there is a collision here. Particles are used to create an explosion effect at the time of collision. The defined particle function becomes active for "0.25 seconds" and is active in the explosion and then disappears.
 
 
+The collision functions is given below.
+```
+...
+        def collision(bullet_x_axis, bullet_y_axis, vehicle_x_axis, vehicle_y_axis):
+            cols = sqrt((pow((bullet_x_axis - vehicle_x_axis - 16), 2)) +
+                        (pow((bullet_y_axis - vehicle_y_axis), 2)))
+            cols = int(cols)
+            if cols < 64:
+                return True
+            else:
+                return False
 
+        def collision_particles(prtcls, cols_x, cols_y):
+            prtcls.append([[cols_x, cols_y], [randint(0, 20) / 10 - 1, randint(0, 20) / 10 - 1],
+                          randint(6, 10)])
+            for particle in prtcls:
+                particle[0][0] += particle[1][0]
+                particle[0][1] += particle[1][1]
+                particle[2] -= 0.09
+                pygame.draw.circle(screen, (200, 200, 200), (int(particle[0][0]), int(particle[0][1])),
+                                   int(particle[2]))
+                if particle[2] <= 0:
+                    prtcls.remove(particle)
+            return prtcls
+...
+```
+When the plasma beam is active and until this plasma beam reaches the limits, the bullet cannot be fired.
+
+
+```
+...
+                if event.key == pygame.K_SPACE:
+                    if plasma_blast_bar_filler >= 31 * self.width // 250 and is_on_the_player:
+                        global particle_status
+                        if particle_status is "ready":
+                            particle_x, particle_y = plasma_beam.fire()
+                            truth = True
+                            plasma_blast_bar_filler = 0
+                    if plasma_blast_bar_filler != 0 and not truth:
+                        global fire_status_player
+                        if fire_status_player is "ready":
+                            bullet_player_x, bullet_player_y = player_bullet.is_fire_ready()
+
+            enemy_x_up_limit, enemy_x_low_limit, enemy_x_changer, enemy_x = enemy.boundaries(enemy_x_up_limit,
+                                                                                             enemy_x_low_limit,
+                                                                                             enemy_x_changer,
+                                                                                             self.width)
+            bullet_player_y = player_bullet.fire(bullet_player_x, bullet_player_y)
+            collision_enemy = collision(bullet_player_x, bullet_player_y, enemy_x, enemy_y)
+            if collision_enemy:
+                hit_enemy += 10
+                enemy_collision_particle = True
+
+            if not enemy_collision_particle:
+                enemy_collision_loop_time = time()
+                enemy_cols_particles = []
+            if enemy_collision_particle:
+                enemy_cols_particles = collision_particles(enemy_cols_particles, enemy_x + 32, enemy_y + 32)
+            if time() > enemy_collision_loop_time + 0.25:
+                enemy_collision_loop_time = time()
+                enemy_collision_particle = False
+            if bullet_player_y < 0 or collision_enemy:
+                bullet_player_x, bullet_player_y = player_x, player_y
+                fire_status_player = "ready"
+
+            if time() >= time_enemy_fire + time_laps:
+                time_enemy_fire = time()
+                time_laps = randint(0, 2)
+                if fire_status_enemy is "ready":
+                    bullet_enemy_x, bullet_enemy_y = enemy_bullet.is_enemy_fire_ready()
+            bullet_enemy_y = enemy_bullet.enemy_fire(bullet_enemy_x, bullet_enemy_y)
+            collision_player = collision(bullet_enemy_x, bullet_enemy_y, player_x, player_y)
+            if collision_player:
+                hit_player += 10
+                player_collision_particle = True
+            if not player_collision_particle:
+                player_collision_loop_time = time()
+                player_cols_particles = []
+            if player_collision_particle:
+                player_cols_particles = collision_particles(player_cols_particles, player_x + 32, player_y + 32)
+                if time() > player_collision_loop_time + 0.25:
+                    player_collision_loop_time = time()
+                    player_collision_particle = False
+            if bullet_enemy_y > self.height or collision_player:
+                bullet_enemy_x, bullet_enemy_y = enemy_x, enemy_y
+                fire_status_enemy = "ready"
+
+            if truth:
+                particle_y_changer = -self.width / 8000
+                particle_y = plasma_beam.particles_go_to_the_enemy(self.width / 8000)
+            collision_plasma_beam = collision(particle_x, particle_y, enemy_x, enemy_y)
+            if collision_plasma_beam:
+                hit_enemy += 50
+            if particle_y < 0 or collision_plasma_beam:
+                particle_x, particle_y = self.width // 80, self.height - self.height // 24
+                particle_status = "ready"
+                plasma_blast_bar_filler = 0
+                plasma_sig_color = (200, 0, 0)
+                particle_y_changer = 0
+                truth = False
+                is_on_the_player = False
+...
+```
+# The Plasma Beam
+
+The charge of the Plasma beam starts to charge from the moment the game starts. It fills up step by step, at a speed adjusted to the game size. As soon as the rod is full, the plasma beam particles float on the player and wait for the shot. When fired, the plasma beam of particles glides towards the enemy, dealing 5x shell damage. Three different visuals have been defined for this array of particles, these are small, medium and large pieces of fire. 
+```
+...
+        class Particle:
+            def __init__(self, particle_img1, particle_img2, particle_img3, particle_x_axis, particle_y_axis):
+                self.particle_img1 = particle_img1
+                self.particle_img2 = particle_img2
+                self.particle_img3 = particle_img3
+                self.particle_x_axis = particle_x_axis
+                self.particle_y_axis = particle_y_axis
+
+            def blit_particle_group(self, particle_list, partic_x_changer, partic_y_changer):
+
+                particle_list.append([[self.particle_x_axis, self.particle_y_axis],
+                                     [randint(0, 20) / 10 - 1, randint(0, 20) / 10 - 1], randint(4, 6)])
+                for particle in particle_list:
+                    particle[0][0] += particle[1][0]
+                    particle[0][1] += particle[1][1]
+                    particle[2] -= 0.1
+                    if -0.2 < particle[1][0] < 0.2:
+                        screen.blit(self.particle_img1, (int(particle[0][0]), int(particle[0][1])))
+                    elif -0.6 < particle[1][0] < 0.6:
+                        screen.blit(self.particle_img2, (int(particle[0][0]), int(particle[0][1])))
+                    elif -1 < particle[1][0] < 1:
+                        screen.blit(self.particle_img3, (int(particle[0][0]), int(particle[0][1])))
+                    if particle[2] <= 0:
+                        particle_list.remove(particle)
+                    self.particle_x_axis += partic_x_changer
+                    self.particle_y_axis += partic_y_changer
+                return particle_list, self.particle_x_axis, self.particle_y_axis, partic_x_changer, partic_y_changer
+
+            def fire(self):
+                x_list = []
+                y_list = []
+                x_list.append(self.particle_x_axis)
+                if len(x_list) > 2:
+                    x_list.pop(1)
+                y_list.append(self.particle_y_axis)
+                if len(y_list) > 2:
+                    y_list.pop(1)
+                global particle_status
+                particle_status = "wait"
+                return x_list[0], y_list[0]
+
+            def particles_go_to_the_enemy(self, partic_y_changer):
+                global particle_status
+                if particle_status is "wait":
+                    particles.append([[self.particle_x_axis, self.particle_y_axis],
+                                     [randint(0, 20) / 10 - 1, randint(0, 20) / 10 - 1], randint(4, 6)])
+                    for particle in particles:
+                        particle[0][0] += particle[1][0]
+                        particle[0][1] += particle[1][1]
+                        particle[2] -= 0.1
+                        if -0.2 < particle[1][0] < 0.2:
+                            screen.blit(self.particle_img1, (int(particle[0][0]), int(particle[0][1])))
+                        elif -0.6 < particle[1][0] < 0.6:
+                            screen.blit(self.particle_img2, (int(particle[0][0]), int(particle[0][1])))
+                        elif -1 < particle[1][0] < 1:
+                            screen.blit(self.particle_img3, (int(particle[0][0]), int(particle[0][1])))
+                        if particle[2] <= 0:
+                            particles.remove(particle)
+                    self.particle_y_axis += partic_y_changer
+                return self.particle_y_axis
+...
+```
+# All python scripts and data file are included in the files. Thanks for reading...
  
