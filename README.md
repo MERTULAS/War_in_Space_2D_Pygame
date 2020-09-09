@@ -14,6 +14,7 @@
  from random import randint
  from time import time
  from fonts import Fonts
+ from pygame import mixer
  ```
  
  The module in which the fonts are loaded is as follows.
