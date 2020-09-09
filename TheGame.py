@@ -736,3 +736,8 @@ class TheGame:
 
             screen.blit(back_text, (self.width // 1.14, self.height // 1.08))
             pygame.display.update()
+
+    @staticmethod
+    def quit_game():
+        game_run = False
+        return game_run
